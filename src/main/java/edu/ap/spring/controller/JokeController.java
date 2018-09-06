@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -22,8 +23,10 @@ public class JokeController {
    }
        
    @RequestMapping("/joke")
-   public String joke() {
+   public String joke(Map<String, Object> model) {
 	    URL url;
+	    String joke = "All out of jokes!";
+		
 		try {
 			// connect to url
 			url = new URL("http://api.icndb.com/jokes/random");
@@ -31,7 +34,7 @@ public class JokeController {
 		    request.connect();
 
 		    // create a json from received data
-		    JsonParser jp = new JsonParser(); //from gson
+		    JsonParser jp = new JsonParser();
 		    JsonElement root = jp.parse(new InputStreamReader((InputStream)request.getContent()));
 		    JsonObject rootobj = root.getAsJsonObject(); 
 		    
@@ -40,16 +43,15 @@ public class JokeController {
 		    JsonElement value = jp.parse(strvalue);
 		    JsonObject valueobj = value.getAsJsonObject();
 		    
-		    String joke = valueobj.get("joke").toString();
-		    
-		    // print the joke
-		    System.out.println(joke);
+		    joke = valueobj.get("joke").toString();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    
-	   return "";
+
+		model.put("joke", joke);
+		
+		return "JokePage";
    }
 		   
    @RequestMapping("/joke_post")
