@@ -19,17 +19,15 @@ import com.google.gson.JsonParser;
 @Scope("session")
 public class JokeController {
    
-   public JokeController() {
-   }
+   public JokeController() {}
        
-   @RequestMapping("/joke")
-   public String joke(Map<String, Object> model) {
-	    URL url;
-	    String joke = "All out of jokes!";
+   /* Method to get joke from URL */
+   private String getJokeFromUrl(String inputUrl) {
+	   String joke = "All out of jokes!";
 		
 		try {
 			// connect to url
-			url = new URL("http://api.icndb.com/jokes/random");
+			URL url = new URL(inputUrl);
 			URLConnection request = url.openConnection();
 		    request.connect();
 
@@ -48,15 +46,23 @@ public class JokeController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		model.put("joke", joke);
-		
+	   
+	   return joke;
+   }
+   
+   @RequestMapping("/joke")
+   public String joke() {
 		return "JokePage";
    }
 		   
    @RequestMapping("/joke_post")
-   public String joke_post() {
-	   return "";
+   public String joke_post(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName, Map<String, Object> model) {
+		String url = "http://api.icndb.com/jokes/random?firstName=" + firstName + "&lastName=" + lastName;	    
+
+		model.put("firstName", firstName);
+		model.put("joke", getJokeFromUrl(url));
+
+		return "JokePage";
    }
    
    @RequestMapping("/")
