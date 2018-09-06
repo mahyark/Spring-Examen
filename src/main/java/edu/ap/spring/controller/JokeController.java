@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +16,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import edu.ap.spring.jpa.Joke;
+import edu.ap.spring.jpa.JokeRepository;
+
 @Controller
 @Scope("session")
 public class JokeController {
-   
-   public JokeController() {}
+
+	@Autowired
+	private JokeRepository repository;
+	
+	public JokeController() {}
        
    /* Method to get joke from URL */
    private String getJokeFromUrl(String inputUrl) {
@@ -52,15 +59,24 @@ public class JokeController {
    
    @RequestMapping("/joke")
    public String joke() {
-		return "JokePage";
+		return "JokeForm";
    }
 		   
    @RequestMapping("/joke_post")
    public String joke_post(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName, Map<String, Object> model) {
 		String url = "http://api.icndb.com/jokes/random?firstName=" + firstName + "&lastName=" + lastName;	    
-
+		String joke = getJokeFromUrl(url);
+		
+		for (Joke j : repository.findAll()) {
+        	if (j.getJoke().equals(joke)) {
+        		System.out.println("This joke already exists!");
+			} else {
+				repository.save(new Joke(joke));
+			}
+        }
+        
 		model.put("firstName", firstName);
-		model.put("joke", getJokeFromUrl(url));
+		model.put("joke", joke);
 
 		return "JokePage";
    }
